@@ -1,0 +1,6 @@
+\beamer@endinputifotherversion {3.36pt}
+\beamer@sectionintoc {1}{Introduction}{1}{0}{1}
+\beamer@sectionintoc {2}{Related works}{3}{0}{2}
+\beamer@sectionintoc {3}{Algorithm overview}{4}{0}{3}
+\beamer@sectionintoc {4}{Algorithm and implimentation details}{5}{0}{4}
+\beamer@sectionintoc {5}{Experiments and result}{18}{0}{5}
