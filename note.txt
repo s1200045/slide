@@ -1,0 +1,11 @@
+Mesh processing and mesh deformation is an important research topic in the geometric modeling community,with important practical applications. 
+
+It allows users with relatively little technical knowledge to model complex freeform shapes through simple and intuitive interfaces. 
+
+In a recent research, used a mesh-based deformation.
+
+One of the problems with the typical mesh-based deformation approaches.
+
+It may lead to defects in the input triangle mesh, such as self-intersection.
+
+In order to overcome this difficulty, we propose an algorithm where a sampling of the triangle mesh is deformed and the deformed surface is obtained from applying a surface reconstruction algorithm to the de- formed point cloud.

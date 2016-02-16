@@ -1,10 +1,15 @@
 \documentclass{beamer}
 
 \usetheme{Boadilla}
+
+
 \usepackage{colortbl}
 \usepackage{multimedia}
 \usepackage{comment}
 \usepackage{graphics}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath}
 
 
 \definecolor{pink}{rgb}{0.8,0.6,0.6}
@@ -14,20 +19,39 @@
 \setbeamercolor{item}{fg=red}
 \setbeamertemplate{items}[square]
 
+
 %% Macro
 \def\x{\mathbf{x}}
 \def\R{\mathbb{R}}
 \def\n{\mathbf{n}}
+\def\bbeta{\boldsymbol\beta}
 %%
 
- \title{A simple approach to mesh deformation}
-\author{Shingo Ito}
-\institute{s1200045}
-\date{\today}
 
 \begin{document}
-\titlepage
+
+\title{A simple approach to mesh deformation}
+\author{Shingo Ito}
+%\institute{s1200045}
+\date{}
+
+\frame{\titlepage}
 %% page 1 : title
+
+
+\begin{frame}
+\frametitle{Table of contents} 
+\Large
+\begin{enumerate}
+\item Introduction
+\item Related works
+\item Algorithm overview
+\item Algorithm and implementation details
+\item Experiments and result
+\item Conclusion
+
+\end{enumerate}
+\end{frame}
 
 
 %page2
@@ -38,20 +62,21 @@
 	\frametitle{Introduction}
 	\Large
 	\begin{itemize}
-   \item Present a simple approach for mesh deformation.
-		%\begin{block}{What is Metamorphosis of shapes?}
-		\item Sampling of the deformed mesh obtained from applying a surface reconstruction algorithm to the deformed point cloud. \\
-		\end{itemize}
+	\item Surface deformation is an important research topic in shape and geometric modeling.
+   	\item Here we present a simple approach for mesh deformation based on surface reconstruction of a deformed sampled point-cloud.
+	\end{itemize}
 	%\end{block}
 \end{frame}
+
 %page3
 \section{Related works}
 \begin{frame}
 \frametitle{Related works}
 \Large
 \begin{itemize}
-\item Surface deformation is an important research topic in shape and geometric modeling.
-\item The main technique consists in computing an approximation of the distance to the zero level-set and deforming this distance field.
+\item Mesh deformation through variational principles (as solution of the harmonic, biharmonic or polyharmonic equation),
+\item Cage-based deformation (using generalized barycentric coordinates),
+\item Computing the distance to the surface and deforming this distance field (level-set methods).
 \end{itemize}
 \end{frame}
 
@@ -59,68 +84,82 @@
 \section{Algorithm overview}
 \begin{frame}
 	\frametitle{Algorithm overview}
-	\Large
-Surface deformation work by moving the triangle mesh vertices according to some specified vector field corresponding to the deformation.
-		\begin{itemize}
-			\item Sample from the surface
-			\item Apply the deformation field to the samples
-			\item Apply a surface reconstruction algorithm to the samples
-			\end{itemize}
+
+\begin{algorithm}[H]
+\caption{Overview}
+\begin{algorithmic}
+\State{Sample from the surface}
+\State{Apply the deformation field to the samples}
+\State{Apply a surface reconstruction algorithm to the samples}
+\end{algorithmic}
+\end{algorithm}
+
 \end{frame}
 
 
 %page5
-\section{Algorithm and implimentation details}
-\Large
+\section{Algorithm and implementation details}
 
 \begin{frame}
 \frametitle{Surface sampling}
-Uniform sampling from a triangle\\
-\begin{itemize}
-\item Function Sample($p_1$, $p_2$, $p_3$, $\xi_1$, $\xi_2$)\\
 
-\  $p_1$, $p_2$ and $p_3$ are the triangle vertices, $\xi_1$ and $\xi_2$ are samples from a uniform distribution\\
+\begin{algorithm}[H]
+\caption{Uniform sampling from a triangle}
+\label{alg:sample}
+\begin{algorithmic}
+\Function{Sample}{$p_1$, $p_2$, $p_3$, $\xi_1$, $\xi_2$}
 
-\  Compute the barycentric coordinates: $u = 1-\sqrt{\xi_1}$ and $v = \xi_2 \sqrt{\xi_1}$\\
+\Comment{$p_1$, $p_2$ and $p_3$ are the triangle vertices, 
+$\xi_1$ and $\xi_2$ are samples from the unit uniform distribution}
 
-\  Compute the sample: $P = u * p_1 + v * p_2 + (1 - u - v) * p_3$\\
-\   return $P$\\
-end function
-\end{itemize}
+\State Compute the barycentric coordinates: $u = 1-\sqrt{\xi_1}$ 
+and $v = \xi_2 \sqrt{\xi_1}$
+\State Compute the sample: $P = u * p_1 + v * p_2 + (1 - u - v) * p_3$
+
+\Return $P$
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
 \end{frame}
 
 
 \begin{frame}
 	\frametitle{Points deformation}
-
-		Given a selected vertex from the input surface. \\
-		Apply a truncated Gaussian centered on this selected vertex \\
+	\Large
+		Given a selected vertex $x_S$ from the input surface, 
+		apply to each point a truncated Gaussian centered on this selected vertex
+		in the normal direction:
 \[f(x)=
 \begin{cases}
-
- \frac{1}{\sqrt{2\pi \sigma}} \exp \left(- \frac{(\x- \x_S)^{2}}{2 \sigma^{2}}\right) & \text{if } \|\ x-\x_S\| < \epsilon \\
+ \frac{1}{\sqrt{2\pi \sigma^2}} \exp \left(- \frac{(\x- \x_S)^{2}}{2 \sigma^{2}}\right) & \text{if } \|\x-\x_S\| < r \\
 0 & \text{otherwise}
 \end{cases}
 \]
+where $r$ is the radius of influence for the truncated Gaussian.
+
 \end{frame}
+
 
 \begin{frame}
 	\frametitle{Surface reconstruction}
 	\Large
-	Implemented and experimented with three surface reconstruction algorithms.\\
-	All approaches are implicit surface based surface reconstruction algorithms\\
-\[f: \R^3 \rightarrow \R\]
+	Implementation and experiments with three surface reconstruction algorithms.\\
+	All approaches are implicit surface based surface reconstruction algorithms. I.e. the output is a function $f$:\\
+	\[f: \R^3 \rightarrow \R\]
+	The zero level-set of $f$ corresponds to the surface of interest.
 \end{frame}
 
 
 \begin{frame}
-	\frametitle{Hermite Radial Basis Functions}
-	\Large
+	\frametitle{Hermite Radial Basis Functions (Macedo et al.)}
+\Large
 Given a set of points $P = {\x_i}$ with normal vector at each point $N = {\n_i}$, 
-the output of the method is a function: $f : \R^3 \to \R$ defined as follows:
+look for a function: $f : \R^3 \to \R$ defined as follows:
 \[
-f(\x)=\sum_{i=1}^n(\alpha_i\phi(\|\x-\x_i\|)-\beta_i\nabla\phi(\|\x-\x_i\|))
+f(\x)=\sum_{i=1}^n(\alpha_i\phi(\|\x-\x_i\|)-\bbeta_i\nabla\phi(\|\x-\x_i\|))
 \]
+where the unknowns to be determined are the coefficients $\alpha_i$ and $\bbeta_i$.
 
 \end{frame}
 
@@ -131,15 +170,15 @@ f(\x)=\sum_{i=1}^n(\alpha_i\phi(\|\x-\x_i\|)-\beta_i\nabla\phi(\|\x-\x_i\|))
 The conditions used to determine the coefficients are: \[f(\x_i) = 0, \x_i \in \R^3\]
 for interpolating points on the surface. And: \[\nabla f(\x_i)=\n_i, \x_i \in \R^3, \n_i \in \R^3\]
 for interpolating the normals on the surface.
-
 \end{frame}
 
 
 \begin{frame}
 \frametitle{Hermite Radial Basis Functions}
 \Large
-\[f(\x_i)=\sum_{j=1}^n(\alpha_j\phi(\|\x_i-\x_j\|)-\beta_j\nabla\phi(\|\x_i-\x_j\|))=0\]
-\[\nabla f(\x_i)=\sum_{j=1}^n(\alpha_j\nabla\phi(\|\x_i-\x_j\|)-H\phi(\|\x_i-\x_j\|)\beta_j)=\n_i\]
+This gives the following system of equations to solve:
+\[f(\x_i)=\sum_{j=1}^n(\alpha_j\phi(\|\x_i-\x_j\|)-\bbeta_j\nabla\phi(\|\x_i-\x_j\|))=0\]
+\[\nabla f(\x_i)=\sum_{j=1}^n(\alpha_j\nabla\phi(\|\x_i-\x_j\|)-H\phi(\|\x_i-\x_j\|)\bbeta_j)=\n_i\]
 where $H$ is the Hessian matrix of $\phi$.
 \end{frame}
 
@@ -147,13 +186,18 @@ where $H$ is the Hessian matrix of $\phi$.
 \begin{frame}
 	\frametitle{Hermite Radial Basis Functions}
 	\Large
+	Adding linear polynomials and the additional condition:
+	\begin{equation} \label{hrbfcond}
+	\sum_{j=1}^n[p_k(x_j)\nabla p_k(x_j)^T]\begin{bmatrix}\alpha_j\\\bbeta_j\end{bmatrix}=0
+	\end{equation}
+	We obtain:
 	\begin{align} \label{hrbf1}
  & \sum_{j=1}^n
 \begin{bmatrix}
 \phi(\|\x_i-\x_j\|) & -\nabla\phi(\|\x_i-\x_j\|)^T\\ \nabla\phi(\|\x_i-\x_j\|) & -H\phi(\|\x_i-\x_j\|)
 \end{bmatrix}
 \begin{bmatrix}
-\alpha_j\\\beta_j
+\alpha_j\\\bbeta_j
 \end{bmatrix} \nonumber
 \\
  & + \sum_{l=1}^m\lambda_l
@@ -166,10 +210,6 @@ p_l(\x_i)\\\nabla p_l(\x_i)
 \end{bmatrix}
 \end{align}
 %\]
-With the additional condition:
-\begin{equation} \label{hrbfcond}
-\sum_{j=1}^n[p_k(x_j)\nabla p_k(x_j)^T]\begin{bmatrix}\alpha_j\\\beta_j\end{bmatrix}=0
-\end{equation}
 
 \end{frame}
 
@@ -177,15 +217,20 @@ With the additional condition:
 \begin{frame}
 	\frametitle{Hermite Radial Basis Functions}
 	\Large
-\[\nabla\phi(\|x\|) = 3x\|x\|\]
-\[ H \phi (\|x\|)= \left\{ \begin{array}{ll} 3/\|x\|(\|x\|^2I_{3\times3}) + xx^T, & \|x\| \neq 0\\ 
-0_{3\times3}, &\|x\| = 0 \end{array}\right.\]
+	One possible choice of basis function is the triharmonic splines:
+	\[ \phi(\|\x\|) = \|\x\|^3 \]
+\[\nabla\phi(\|\x\|) = 3\x\|\x\|\]
+\[ H \phi (\|\x\|)= \left\{ \begin{array}{ll} 3/\|\x\|(\|\x\|^2I_{3\times3}) + \x\x^T, & \|\x\| \neq 0\\ 
+0_{3\times3}, &\|\x\| = 0 \end{array}\right.\]
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Closed form solution for compactly supported functions}
-\Large
+\frametitle{Closed form approximation for compactly supported functions (Liu and Wang)}
+
+When compactly supported functions are used, 
+it is possible to compute an approximation to the solution 
+without forming or inverting any matrix
 \begin{equation} \label{hrbfclosed}
 f(x)=-\sum_{j=1}^n<\frac{\rho^2_j}{20+\eta\rho^2_j} \n_j, \nabla\phi_{\rho_j}(\|\x-\x_j\|)>
 \end{equation}
@@ -202,14 +247,17 @@ where:
 
 \end{frame}
 
+
 \begin{frame}
-	\frametitle{Poisson surface reconstruction}
+	\frametitle{Poisson surface reconstruction (Kazhdan, Bolitho and Hoppe)}
+\Large
+The third approach consists in computing an indicator function for the solid 
+to be reconstructed:
 \[
 f_S (\x)= \left\{ \begin{array}{ll} 1 & \x \in S\\ 
 0 & otherwise \end{array}\right.
 \]\\
-The indicator function
-$f$ is obtained by solving the Poisson equation
+by solving the Poisson equation
 \[
 \Delta f=div(\n)
 \]
@@ -217,32 +265,40 @@ where $\n$ is an extrapolation of the given normal vector field.
 \end{frame}
 
 
-\begin{frame}
-\frametitle{Marching Cubes}
+\begin{frame} 
+\frametitle{Meshing}
 \Large
+To recover a triangle mesh for the deformed point-cloud and the corresponding function $f$,
+its zero level-set needs to be meshed.
+\\
+Two approaches were used:
+\begin{itemize}
+\item Marching Cubes
+\item Delaunay based approach
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Marching Cubes (Lorensen and Cline)}
 Algorithm for rendering isosurfaces from volumetric data. \\
 \begin{itemize}
-\item Bounding box for the object to be meshed and subdivide it regularly into smaller cells. 
-\item the function f is sampled at the eight corners of each cell.
+\item Compute a bounding box for the object to be meshed and subdivide it regularly into smaller cells. 
+\item Sample the function f at the eight corners of each cell.
 \item If one or more values is less than the user-specified iso-value, and one or more have values is greater than this isovalue, the cell must intersect the isosurface.
+\item Determine the edges in the cell that are intersected by the isosurface.
+\item Connect the patches from all cells, we get a linear approximation of the isosurface.
 \end{itemize}
 \end{frame}
 
-
-\begin{frame}
-\frametitle{Marching Cubes}
-\Large
-\begin{itemize}
-\item Determining the edges in the cell that are intersected by the isosurface.
-\item connecting the patches from all cells, we get a linear approximation of the isosurface.
-\end{itemize}
-\end{frame}
 
 \begin {frame}
 \frametitle{Delaunay based implicit surface meshing}
 \Large
+Marching Cubes based algorithm sample the function at each cells node. 
+But it does not exploit the information about the surface location. Instead 
+it seems preferrable to use the following approach:
 \begin{itemize}
-\item Marching Cubes based algorithm do not look like the most effective approach.\\
 \item Compute a Delaunay tetrahedralization of the deformed point-cloud.\\
 \item Peel off outside tetrahedra using the fitted function\\
 \end{itemize}
@@ -265,11 +321,11 @@ GPU & Intel HD Graphics5000 \\
 \hline
 Memory & 4.0GB RAM \\ 
 \hline
-OS & OS X Yosemite ver- sion 10.10.5 \\  
+OS & OS X Yosemite version 10.10.5 \\  
 \hline
 Programming Language & C++ \\
 \hline 
-Libraries & CGAL4.7,OpenGL,Eigen \\ 
+Libraries & CGAL4.7, OpenGL, Eigen \\ 
 \hline
 \end{tabular}
 \end{center}
@@ -280,7 +336,7 @@ Libraries & CGAL4.7,OpenGL,Eigen \\
 
 \begin{frame}
 	\frametitle{Deformation of a sphere}
- Start from a sphere repre-sented by a triangle mesh, made of 174 vertices and 344 triangles. \\
+ Start from a sphere represented by a triangle mesh, made of 174 vertices and 344 triangles. \\
  \begin{figure}
  \centering
  \hbox{
@@ -322,13 +378,15 @@ reconstruction approach}
 
 
 \end{frame}
-
+\section{Conclusion}
 \begin{frame}
 \frametitle{Conclusion}
+\Large
 \begin{itemize}
-\item Proposed a simple algorithm for mesh deformation.
-\item Reconstruction from the point-cloud is made by fitting an implicit surface to the point-cloud and meshing it.
-\item Future works : Implementing parts of the algorithm on the graphics card (GPU).
+\item A simple algorithm for mesh deformation.
+\item Sample from the mesh, deforms the sample (no connectivity to maintain), perform surface
+reconstruction.
+\item Future works : algorithmitic improvements, implementation of parts of the algorithm on the graphics card (GPU).
 \end{itemize}
 \end{frame}
 \begin{frame}
